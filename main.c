@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>   // For time()
+#define GENOMELENGTH 5 // this should be the number of genes, ignoring the 0 index as last index used as terminator
+#define POPSIZE 100
 
 // Define your representation, fitness function, and other components here
 
 typedef struct {
-    char content[2]; // Two to allow null terminator \0
+    char content[GENOMELENGTH+1]; // Two to allow null terminator \0
+    int fitness; // Individuals fitness
 } individual;
 
 typedef struct {
@@ -13,8 +17,18 @@ typedef struct {
 } population;
 
 
+void viewPop(population *pop);
+
 int fitnessFunction (individual ind) {
+
     int fitness = 0;
+
+    for (int i = 0; i < GENOMELENGTH; i++) {
+        if (ind.content[i] == 'B') {
+            fitness++;
+        }
+    }
+
     return fitness;
 }
 
@@ -28,19 +42,37 @@ void initPopulation(population *pop, int size) {
         exit(1);
     }
 
-    // Optionally initialize the content of each individual
+    //Initialize the content of each individual
     for (int i = 0; i < size; i++) {
-        pop->individuals[i].content[0] = 'A'; // Example initialization
-        pop->individuals[i].content[1] = '\0';
+        for (int j = 0; j < GENOMELENGTH; j++) {
+            pop->individuals[i].content[j] = 'A' + (rand() % 26);
+        }
+        pop->individuals[i].content[GENOMELENGTH] = '\0'; // Place the null terminator
+        pop->individuals[i].fitness = fitnessFunction(pop->individuals[i]);
     }
+
+}
+
+// Function to free the allocated memory for the population
+void freePopulation(population *pop) {
+    free(pop->individuals);
+    pop->individuals = NULL;
+    pop->size = 0;
 }
 
 int main() {
     // Initialize population
-    // Calculate fitness for the initial population
+    population pop;
+    initPopulation(&pop, POPSIZE); // This will also calc the initial fitnesses
+
+
+    viewPop(&pop); // For Testing
+
+    // Free allocated pop memory
+    freePopulation(&pop);
 
     int iterations = 2000;
-    while (iterations>0) {
+    //while (iterations>0) {
         // Selection
         // Crossover
         // Mutation
@@ -48,9 +80,16 @@ int main() {
         // Replacement to form the next generation
 
         // Update termination_condition if necessary
-        iterations--;
-    }
+        //iterations--;
+    //}
 
     // Output the best solution found
     return 0;
 }
+
+void viewPop(population *pop) {
+    for (int i = 0; i < (*pop).size; i++) {
+        printf("Individual %d Content %s Fitness %d\n", i, (*pop).individuals[i].content, (*pop).individuals[i].fitness);
+    }
+}
+
