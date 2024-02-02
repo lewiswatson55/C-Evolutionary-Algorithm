@@ -16,3 +16,5 @@ Things that could be improved:
 
 ---
 This code was just made for fun and to practice C.
+
+> Time log: 02:39:00 elapsed.
