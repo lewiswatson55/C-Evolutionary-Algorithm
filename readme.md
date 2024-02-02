@@ -12,7 +12,7 @@ Things that could be improved:
 - Better selection (and put in a method)
 - Implementation of other crossovers
 - Noise based random mutation (broadly seen as better performing)
-- 
+- Many many more things
 
 ---
 This code was just made for fun and to practice C.
