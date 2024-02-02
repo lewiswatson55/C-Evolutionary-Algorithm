@@ -9,17 +9,17 @@
 typedef struct {
     char content[GENOMELENGTH+1]; // Two to allow null terminator \0
     int fitness; // Individuals fitness
-} individual;
+} genome;
 
 typedef struct {
-    individual *individuals; // Pointer to an array of individuals
+    genome *individuals; // Pointer to an array of individuals
     int size; // Size of the population
 } population;
 
 
 void viewPop(population *pop);
 
-int fitnessFunction (individual ind) {
+int fitnessFunction (genome ind) {
 
     int fitness = 0;
 
@@ -36,13 +36,13 @@ int fitnessFunction (individual ind) {
 // Function to initialize a population of a given size
 void initPopulation(population *pop, int size) {
     pop->size = size;
-    pop->individuals = (individual *)malloc(size * sizeof(individual));
+    pop->individuals = (genome *)malloc(size * sizeof(genome));
     if (pop->individuals == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(1);
     }
 
-    //Initialize the content of each individual
+    //Initialize the content of each genome
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < GENOMELENGTH; j++) {
             pop->individuals[i].content[j] = 'A' + (rand() % 26);
