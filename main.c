@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>   // For time()
 #include <stdbool.h>
-#define GENOMELENGTH 100   // this should be the number of genes, ignoring the 0 index as last index used as terminator
+#define GENOMELENGTH 50   // this should be the number of genes, ignoring the 0 index as last index used as terminator
 #define POPSIZE 1000
 #define MUTATEPROB 0.2
 #define ITERATIONNUM 20000
