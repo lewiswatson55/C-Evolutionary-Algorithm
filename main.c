@@ -1,25 +1,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>   // For time()
+#include <stdbool.h>
 #define GENOMELENGTH 5 // this should be the number of genes, ignoring the 0 index as last index used as terminator
 #define POPSIZE 100
+#define MUTATEPROB 0.2
 
-// Define your representation, fitness function, and other components here
 
+// Representation definition
 typedef struct {
     char content[GENOMELENGTH+1]; // Two to allow null terminator \0
     int fitness; // Individuals fitness
-} genome;
+} Genome;
 
 typedef struct {
-    genome *individuals; // Pointer to an array of individuals
-    int size; // Size of the population
-} population;
+    Genome *individuals; // Pointer to an array of individuals
+    int size; // Size of the Population
+} Population;
 
 
-void viewPop(population *pop);
+// Method declarations
+void viewPop(Population *pop);
+void sortPopulationByFitness(Population *pop);
+void viewGenome(Genome genome);
+void findTwoNumbers(int *num1, int *num2);
+void TwoPtCx(Genome mum, Genome dad, Genome *child);
+void microwaveChild(Genome *child);
+void replacePop(Genome baby, Population *pop);
 
-int fitnessFunction (genome ind) {
+int fitnessFunction (Genome ind) {
 
     int fitness = 0;
 
@@ -33,16 +42,16 @@ int fitnessFunction (genome ind) {
 }
 
 
-// Function to initialize a population of a given size
-void initPopulation(population *pop, int size) {
+// Function to initialize a Population of a given size
+void initPopulation(Population *pop, int size) {
     pop->size = size;
-    pop->individuals = (genome *)malloc(size * sizeof(genome));
+    pop->individuals = (Genome *)malloc(size * sizeof(Genome));
     if (pop->individuals == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(1);
     }
 
-    //Initialize the content of each genome
+    //Initialize the content of each Genome
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < GENOMELENGTH; j++) {
             pop->individuals[i].content[j] = 'A' + (rand() % 26);
@@ -51,45 +60,155 @@ void initPopulation(population *pop, int size) {
         pop->individuals[i].fitness = fitnessFunction(pop->individuals[i]);
     }
 
+    sortPopulationByFitness(pop);
+
 }
 
-// Function to free the allocated memory for the population
-void freePopulation(population *pop) {
+// Function to free the allocated memory for the Population
+void freePopulation(Population *pop) {
     free(pop->individuals);
     pop->individuals = NULL;
     pop->size = 0;
 }
 
 int main() {
-    // Initialize population
-    population pop;
+
+    // Seed the random number generator with time
+    srand((unsigned int)time(NULL));
+
+    // Initialize Population
+    Population pop;
     initPopulation(&pop, POPSIZE); // This will also calc the initial fitnesses
 
+    //viewPop(&pop); // For Testing
 
-    viewPop(&pop); // For Testing
+    int iterations = 2000;
+    while (iterations>0) {
+
+        // Select top parents
+        Genome parent1 = pop.individuals[0];
+        Genome parent2 = pop.individuals[1];
+
+        viewGenome(parent1);
+        viewGenome(parent2);
+
+        // Crossover
+        Genome child;
+        TwoPtCx(parent1, parent2, &child);
+
+        // Mutation
+        microwaveChild(&child);
+
+        // Calculate Child Fitness
+        child.fitness = fitnessFunction(child);
+
+        // Check child
+        viewGenome(child);
+
+        // Replacement to form the next generation
+        replacePop(child, &pop);
+
+        // Update Iterations
+        iterations--;
+    }
+
+    // Show full population (sorted)
+    sortPopulationByFitness(&pop); // Shouldn't be required but just to be safe...
+    viewPop(&pop);
+
 
     // Free allocated pop memory
     freePopulation(&pop);
-
-    int iterations = 2000;
-    //while (iterations>0) {
-        // Selection
-        // Crossover
-        // Mutation
-        // Calculate fitness for the new population
-        // Replacement to form the next generation
-
-        // Update termination_condition if necessary
-        //iterations--;
-    //}
 
     // Output the best solution found
     return 0;
 }
 
-void viewPop(population *pop) {
-    for (int i = 0; i < (*pop).size; i++) {
-        printf("Individual %d Content %s Fitness %d\n", i, (*pop).individuals[i].content, (*pop).individuals[i].fitness);
+void replacePop(Genome baby, Population *pop) {
+    pop->individuals[POPSIZE - 1] = baby;
+    sortPopulationByFitness(pop);
+}
+
+// Mutation Operator
+void microwaveChild(Genome *child) {
+    // Loop through each character in the individual's content
+    for (int i = 0; i < GENOMELENGTH; i++) {
+        float chance = (float)rand() / (float)RAND_MAX; // Generate a number between 0.0 and 1.0
+        if (chance < MUTATEPROB) { // 20% chance to mutate
+            child->content[i] = 'A' + (rand() % 26); // Random character between 'A' and 'Z'
+            printf("A child has been microwaved...\n");
+        }
     }
 }
 
+// Two Point Crossover
+void TwoPtCx(Genome mum, Genome dad, Genome *child) {
+    // Split points
+    int pointA;
+    int pointB;
+    findTwoNumbers(&pointA, &pointB);
+    printf("\n%d and %d\n", pointA, pointB);
+
+    // Copy from mum up to pointA
+    for (int j = 0; j < pointA; j++) {
+        child->content[j] = mum.content[j];
+    }
+
+    // Copy from dad from pointA to pointB
+    for (int j = pointA; j < pointB; j++) {
+        child->content[j] = dad.content[j];
+    }
+
+    // Copy the rest from mum or dad as needed after pointB to the end
+    for (int j = pointB; j < GENOMELENGTH; j++) {
+        child->content[j] = mum.content[j];
+    }
+
+    // Ensure the string is null-terminated
+    child->content[GENOMELENGTH] = '\0';
+}
+
+void findTwoNumbers(int *num1, int *num2) {
+    // Generate the first number
+    *num1 = (rand() % GENOMELENGTH); // Not plus one because it cannot be 5
+    //printf("%d",*num1); // for debugging
+
+    do {
+        // Generate the second number
+        *num2 = (rand() % GENOMELENGTH) + 1;
+        //printf("%d",*num2); // for debugging
+    } while (*num1 >= *num2); // Ensure num2 is distinct and bigger then num1
+}
+
+
+void viewPop(Population *pop) {
+    for (int i = 0; i < (*pop).size; i++) {
+        printf("Genome Rank in pop: %d Content: %s Fitness: %d\n", i, (*pop).individuals[i].content, (*pop).individuals[i].fitness);
+    }
+}
+
+void viewGenome(Genome genome) {
+    printf("Genome Content %s Fitness %d\n", genome.content, genome.fitness);
+}
+
+// Function to sort the Population by fitness in descending order
+void sortPopulationByFitness(Population *pop) {
+    int i, j;
+    bool swapped;
+    for (i = 0; i < pop->size - 1; i++) {
+        swapped = false;
+        for (j = 0; j < pop->size - i - 1; j++) {
+            if (pop->individuals[j].fitness < pop->individuals[j + 1].fitness) {
+                // Swap the individuals
+                Genome temp = pop->individuals[j];
+                pop->individuals[j] = pop->individuals[j + 1];
+                pop->individuals[j + 1] = temp;
+                swapped = true;
+            }
+        }
+        // If no two elements were swapped by inner loop, then break
+        if (!swapped) {
+            break;
+        }
+    }
+}
