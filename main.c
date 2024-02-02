@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <time.h>   // For time()
 #include <stdbool.h>
-#define GENOMELENGTH 100 // this should be the number of genes, ignoring the 0 index as last index used as terminator
-#define POPSIZE 100
+#define GENOMELENGTH 100   // this should be the number of genes, ignoring the 0 index as last index used as terminator
+#define POPSIZE 1000
 #define MUTATEPROB 0.2
-#define ITERATIONNUM 2000
+#define ITERATIONNUM 20000
 
 
 // Representation definition
@@ -52,7 +52,7 @@ void initPopulation(Population *pop, int size) {
         exit(1);
     }
 
-    //Initialize the content of each Genome
+    // Initialize the content of each Genome
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < GENOMELENGTH; j++) {
             pop->individuals[i].content[j] = 'A' + (rand() % 26);
