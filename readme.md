@@ -1,4 +1,4 @@
-# Evolutionary Algorithm Implemented in C [Demo]
+# CEA: Evolutionary Algorithm Implemented in C [Demo]
 
 A simple EA implemented in the C programming language.
 
