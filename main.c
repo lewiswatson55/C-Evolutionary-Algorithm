@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <time.h>   // For time()
 #include <stdbool.h>
-#define GENOMELENGTH 5 // this should be the number of genes, ignoring the 0 index as last index used as terminator
+#define GENOMELENGTH 100 // this should be the number of genes, ignoring the 0 index as last index used as terminator
 #define POPSIZE 100
 #define MUTATEPROB 0.2
+#define ITERATIONNUM 2000
 
 
 // Representation definition
@@ -82,15 +83,16 @@ int main() {
 
     //viewPop(&pop); // For Testing
 
-    int iterations = 2000;
+    int iterations = ITERATIONNUM;
     while (iterations>0) {
 
         // Select top parents
         Genome parent1 = pop.individuals[0];
         Genome parent2 = pop.individuals[1];
 
-        viewGenome(parent1);
-        viewGenome(parent2);
+        // Uncomment for verbose/debugging - will drastically slow down program.
+        //viewGenome(parent1);
+        //viewGenome(parent2);
 
         // Crossover
         Genome child;
@@ -103,7 +105,7 @@ int main() {
         child.fitness = fitnessFunction(child);
 
         // Check child
-        viewGenome(child);
+        //viewGenome(child); // For debugging - slows program
 
         // Replacement to form the next generation
         replacePop(child, &pop);
@@ -136,7 +138,7 @@ void microwaveChild(Genome *child) {
         float chance = (float)rand() / (float)RAND_MAX; // Generate a number between 0.0 and 1.0
         if (chance < MUTATEPROB) { // 20% chance to mutate
             child->content[i] = 'A' + (rand() % 26); // Random character between 'A' and 'Z'
-            printf("A child has been microwaved...\n");
+            //printf("A child has been microwaved...\n"); // for debugging
         }
     }
 }
@@ -147,7 +149,7 @@ void TwoPtCx(Genome mum, Genome dad, Genome *child) {
     int pointA;
     int pointB;
     findTwoNumbers(&pointA, &pointB);
-    printf("\n%d and %d\n", pointA, pointB);
+    //printf("\n%d and %d\n", pointA, pointB); // uncomment for debugging
 
     // Copy from mum up to pointA
     for (int j = 0; j < pointA; j++) {
